@@ -53,7 +53,7 @@ class NuVotifierClient:
             raise NuVotifierHeaderError(header)
 
         header_split = header.split()
-    
+
         if len(header_split) != 3:
             raise NuVotifierHeaderError(header)
 
