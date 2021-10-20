@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "aio-votifier"
+name = "aiovotifier"
 version = "0.1.0"
 description = "An asynchronous MInecraft server votifier client in Python"
 authors = ["Milo Weinberg <iapetus011@gmail.com>"]
