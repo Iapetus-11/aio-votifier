@@ -1,4 +1,3 @@
-
 class VotifierError(Exception):
     """Base class for votifier exceptions"""
 
