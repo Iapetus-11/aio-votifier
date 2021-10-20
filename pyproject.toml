@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "aio-votifier"
+version = "0.1.0"
+description = "An asynchronous MInecraft server votifier client in Python"
+authors = ["Milo Weinberg <iapetus011@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+
+[tool.poetry.dev-dependencies]
+black = "^21.9b0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
