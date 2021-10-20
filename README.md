@@ -1,4 +1,4 @@
-# aio-votifier
+# Aio-Votifier ![Code Quality](https://www.codefactor.io/repository/github/iapetus-11/aio-votifier/badge) ![PYPI Version](https://img.shields.io/pypi/v/aio-votifier.svg) ![PYPI Downloads](https://img.shields.io/pypi/dw/aio-votifier?color=0FAE6E) ![Views](https://api.ghprofile.me/view?username=iapetus-11.aio-votifier&color=0FAE6E&label=views&style=flat)
 *An asynchronous MInecraft server votifier client in Python*
 
 ## Example Usage:
