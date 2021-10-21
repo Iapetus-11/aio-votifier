@@ -24,10 +24,10 @@ class NuVotifierClient:
         await self.connect()
         return self
 
-    async def __aexit__(self):
+    async def __aexit__(self, *args, **kwargs):
         await self.close()
 
-    async def connect(self, *args, **kwargs) -> "NuVotifierClient":
+    async def connect(self) -> "NuVotifierClient":
         if self._ready:
             return
 
