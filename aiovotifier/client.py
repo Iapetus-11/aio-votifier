@@ -32,6 +32,7 @@ class NuVotifierClient:
             return
 
         self._reader, self._writer = await asyncio.open_connection(self.host, self.port)
+        self._ready = True
 
     async def close(self) -> None:
         if self._ready:
