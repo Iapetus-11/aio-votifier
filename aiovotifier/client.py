@@ -50,7 +50,7 @@ class NuVotifierClient:
 
             if response["status"] != "ok":
                 raise NuVotifierResponseError(response)
-        
+
         finally:
             w.close()
             await w.wait_closed()
