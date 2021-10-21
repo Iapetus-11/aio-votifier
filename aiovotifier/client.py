@@ -38,7 +38,7 @@ class NuVotifierClient:
         self._ready = True
 
         self._header = await self._reader.read(64)
-        
+
         if not self._header:
             raise NuVotifierHeaderError(self._header)
 
@@ -56,7 +56,7 @@ class NuVotifierClient:
             self._writer = None
 
             self._ready = False
-            
+
             self._header = None
             self._header_split = None
 
