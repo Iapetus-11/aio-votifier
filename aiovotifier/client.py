@@ -6,7 +6,7 @@ import struct
 import hmac
 import json
 
-from .errors import NuVotifierHeaderError, NuVotifierResponseError, ClientNotConnectedError
+from .errors import NuVotifierHeaderError, NuVotifierResponseError
 
 
 class NuVotifierClient:
