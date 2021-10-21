@@ -20,6 +20,9 @@ class NuVotifierClient:
         self._reader = None
         self._writer = None
 
+        self._header = None
+        self._header_split = None
+
     async def __aenter__(self):
         await self.connect()
         return self
@@ -34,6 +37,16 @@ class NuVotifierClient:
         self._reader, self._writer = await asyncio.open_connection(self.host, self.port)
         self._ready = True
 
+        self._header = await self._reader.read(64)
+        
+        if not self._header:
+            raise NuVotifierHeaderError(self._header)
+
+        self._header_split = self._header.split()
+
+        if len(self._header_split) != 3:
+            raise NuVotifierHeaderError(self._header)
+
     async def close(self) -> None:
         if self._ready:
             self._writer.close()
@@ -43,20 +56,13 @@ class NuVotifierClient:
             self._writer = None
 
             self._ready = False
+            
+            self._header = None
+            self._header_split = None
 
     async def vote(self, username: str) -> None:
         if not self._ready:
             raise ClientNotConnectedError
-
-        header = await self._reader.read(64)
-
-        if not header:
-            raise NuVotifierHeaderError(header)
-
-        header_split = header.split()
-
-        if len(header_split) != 3:
-            raise NuVotifierHeaderError(header)
 
         # create packet data
         payload = json.dumps(
@@ -65,7 +71,7 @@ class NuVotifierClient:
                 "serviceName": "minecraft.global",
                 "timestamp": round(datetime.datetime.utcnow().timestamp() * 1000),
                 "address": f"{self.host}:{self.port}",
-                "challenge": header_split[2].decode(),
+                "challenge": self._header_split[2].decode(),
             }
         )
         signature = b64encode(hmac.digest(self.token.encode(), payload.encode(), hashlib.sha256)).decode()
