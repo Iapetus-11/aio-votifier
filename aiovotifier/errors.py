@@ -2,10 +2,6 @@ class VotifierError(Exception):
     """Base class for votifier exceptions"""
 
 
-class ClientNotConnectedError(VotifierError):
-    """Raised when a client is used without being connected first"""
-
-
 class NuVotifierError(VotifierError):
     """Base class for NuVotifier exceptions"""
 
