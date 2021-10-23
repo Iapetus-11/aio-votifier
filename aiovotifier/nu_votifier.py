@@ -1,3 +1,8 @@
+"""
+Code for dealing with the NuVotifier / Votifier v2 protocol
+https://www.spigotmc.org/resources/nuvotifier.13449/
+"""
+
 from base64 import b64encode
 import datetime
 import asyncio
@@ -10,12 +15,16 @@ from .errors import NuVotifierHeaderError, NuVotifierResponseError
 
 
 class NuVotifierClient:
+    """Client for servers using the NuVotifier / Votifier v2 protocol"""
+
     def __init__(self, host: str, port: int, token: str):
         self.host = host
         self.port = port
         self.token = token
 
     async def vote(self, username: str) -> None:
+        """Sends a vote to the pre-specified host and port"""
+
         r, w = await asyncio.open_connection(self.host, self.port)
 
         try:
