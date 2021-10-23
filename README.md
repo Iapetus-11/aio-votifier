@@ -31,3 +31,14 @@ asyncio.run(main())
     - `v1_vote(username: str, user_address: str = "127.0.0.1")` - *sends a Votifier v1 vote to a votifier v1 server*
     - `nu_vote(username: str, user_address: str = "127.0.0.1")` - *sends a NuVotifier / v2 vote to a NuVotifier server*
 
+#### *exception* aiovotifier.**VotifierError**
+- *base class that all votifier exceptions derive from*
+
+#### *exception* aiovotifier.**VotifierHeaderError**
+- *raised when the header from the votifier server is invalid*
+
+#### *exception* aiovotifier.**UnsupportedVersionError**
+- *raised when the votifier version is unsupported*
+
+#### *exception* aiovotifier.**NuVotifierResponseError**
+- *Raised when the response from the votifier server contains a status that is not OK*
