@@ -19,7 +19,7 @@ from .utils import ensure_pem_format
 __all__ = ("votifier_v1_vote", "nuvotifier_vote", "VotifierHeader", "VotifierClient")
 
 
-async def votifier_v1_vote(r: StreamReader, service_name: str, username: str, user_address: str, key: RSAPublicKey) -> None:
+async def votifier_v1_vote(r: StreamReader, w: StreamWriter, service_name: str, username: str, user_address: str, key: RSAPublicKey) -> None:
     data = "\n".join(
         [
             "VOTE",
@@ -32,12 +32,12 @@ async def votifier_v1_vote(r: StreamReader, service_name: str, username: str, us
 
     encrypted = key.encrypt(data, PKCS1v15())
 
-    r.write(encrypted)
-    await r.drain()
+    w.write(encrypted)
+    await w.drain()
 
 
 async def nuvotifier_vote(
-    r: StreamReader, w: StreamWriter, service_name: str, username: str, user_address: str, token: str, header_split: List[str]
+    r: StreamReader, w: StreamWriter, service_name: str, username: str, user_address: str, token: str, challenge: str
 ) -> dict:
     # create packet data
     payload = json.dumps(
@@ -46,7 +46,7 @@ async def nuvotifier_vote(
             "serviceName": service_name,
             "timestamp": round(datetime.datetime.utcnow().timestamp() * 1000),
             "address": user_address,
-            "challenge": header_split[2].decode(),
+            "challenge": challenge,
         }
     )
     signature = b64encode(hmac.digest(token.encode(), payload.encode(), hashlib.sha256)).decode()
@@ -67,11 +67,11 @@ async def nuvotifier_vote(
 class VotifierHeader:
     """Used for parsing and storing the votifier header data"""
 
-    __slots__ = ("header", "header_split", "version", "token")
+    __slots__ = ("header", "split", "version", "token")
 
-    def __init__(self, header: bytes, header_split: List[str], version: str, token: str = None):
+    def __init__(self, header: bytes, split: List[str], version: str, token: str = None):
         self.header = header
-        self.header_split = header_split
+        self.split = split
         self.version = version
         self.token = token
 
@@ -133,9 +133,13 @@ class VotifierClient:
                 if self._rsa_pub_key_exc:
                     raise self._rsa_pub_key_exc
 
-                await votifier_v1_vote(r, self.service_name, username, user_address, self._rsa_pub_key)
+                await votifier_v1_vote(r, w, self.service_name, username, user_address, self._rsa_pub_key)
             elif header.version == "2":
-                await nuvotifier_vote(r, w, self.service_name, username, user_address, self.secret)
+                if self._rsa_pub_key:
+                    # even tho it's v2, the user passed in an rsa key which is only used in v1
+                    await votifier_v1_vote(r, w, self.service_name, username, user_address, self._rsa_pub_key)
+                else:
+                    await nuvotifier_vote(r, w, self.service_name, username, user_address, self.secret, header.split[2])
             else:
                 raise UnsupportedVersionError(header.version)
         finally:
@@ -154,7 +158,7 @@ class VotifierClient:
             if self._rsa_pub_key_exc:
                 raise self._rsa_pub_key_exc
 
-            await votifier_v1_vote(r, self.service_name, username, user_address, self._rsa_pub_key)
+            await votifier_v1_vote(r, w, self.service_name, username, user_address, self._rsa_pub_key)
         finally:
             w.close()
             await w.wait_closed()
@@ -166,7 +170,7 @@ class VotifierClient:
             if header.version != "2":
                 raise UnsupportedVersionError(header.version)
 
-            return await nuvotifier_vote(r, w, self.service_name, username, user_address, self.secret)
+            return await nuvotifier_vote(r, w, self.service_name, username, user_address, self.secret, header.split[2])
         finally:
             w.close()
             await w.wait_closed()
