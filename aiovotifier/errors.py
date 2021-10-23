@@ -14,11 +14,9 @@ class UnsupportedVersionError(VotifierError):
         self.version = version
 
 
-class NuVotifierError(VotifierError):
-    """Base class for NuVotifier / Votifier v2 errors"""
+class NuVotifierResponseError(VotifierError):
+    """Raised when the response from the votifier server contains a status that is not OK"""
 
-
-class NuVotifierResponseError(NuVotifierError):
     def __init__(self, response: dict):
         super().__init__(f"Not-OK response received from votifier server: {repr(response)}")
         self.response = response
