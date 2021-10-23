@@ -88,7 +88,7 @@ class VotifierHeader:
 
         version = header_split[1]
 
-        if version == "2" and split_length != "3":
+        if version == "2" and split_length != 3:
             raise VotifierHeaderError(header)
 
         return cls(header, header_split, version, (header[3] if split_length == 3 else None))
