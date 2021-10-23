@@ -166,7 +166,7 @@ class VotifierClient:
             if header.version != "2":
                 raise UnsupportedVersionError(header.version)
 
-            await nuvotifier_vote(r, w, self.service_name, username, user_address, self.secret)
+            return await nuvotifier_vote(r, w, self.service_name, username, user_address, self.secret)
         finally:
             w.close()
             await w.wait_closed()
