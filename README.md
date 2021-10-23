@@ -3,27 +3,18 @@
 
 ## Example Usage:
 ```py
-from aiovotifier import NuVotifierClient
+from aiovotifier import VotifierClient
 import asyncio
 
 async def main():
-    async with NuVotifierClient("127.0.0.1", 8192, "token") as client:
-        await client.vote("Iapetus11")
+    client = VotifierClient("127.0.0.1", 8192, "testservicename", "token/rsa key")
+    
+    # VotifierClient.vote(...) automatically determines the protocol and key format
+    await client.vote("username", "user address")
+    await client.vote("user2")
 
-asyncio.run(main())
-```
-or
-```py
-from aiovotifier import NuVotifierClient
-import asyncio
-
-async def main():
-    client = NuVotifierClient("127.0.0.1", 8192, "token")
-    await client.connect()
-
-    await client.vote("Iapetus11")
-
-    await client.close()
+    await client.v1_vote("username", "user address")  # only supports v1
+    await client.nu_vote("username", "user address")  # only supports NuVotifier/v2
 
 asyncio.run(main())
 ```
