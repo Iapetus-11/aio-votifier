@@ -4,7 +4,7 @@ class VotifierError(Exception):
 
 class VotifierHeaderError(VotifierError):
     def __init__(self, header: bytes):
-        super().__init__("Invalid header received from votifier server.")
+        super().__init__(f"Invalid header received from votifier server: {repr(header)}")
         self.header = header
 
 
