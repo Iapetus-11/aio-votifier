@@ -29,16 +29,30 @@ asyncio.run(main())
 - Methods:
     - `vote(username: str, user_address: str = "127.0.0.1")` - *sends a vote to the votifier server, automatically detects and handles the protocol and type of secret*
     - `v1_vote(username: str, user_address: str = "127.0.0.1")` - *sends a Votifier v1 vote to a votifier v1 server*
-    - `nu_vote(username: str, user_address: str = "127.0.0.1")` - *sends a NuVotifier / v2 vote to a NuVotifier server*
+    - `nu_vote(username: str, user_address: str = "127.0.0.1") -> dict` - *sends a NuVotifier / v2 vote to a NuVotifier server, returns the response from the server*
+
+#### *class* aiovotifier.**VotifierHeader**(header: *bytes*, version: *str*, token: *str* = None)
+- Arguments:
+    - `header: bytes` - *The header received from the votifier server*
+    - `version: str` - *The version of the votifier server*
+    - `token: str = None` - *The token, included only if the votifier server is v2/NuVotifier*
+- Methods:
+    - `@classmethod parse(header: bytes)` - *Returns a new `VotifierHeader`, parsed from the input bytes*
+
+#### *function* aiovotifier.**votifier_v1_vote**(r: *asyncio.StreamReader*, w: *asyncio.StreamWriter*, service_name: *str*, username: *str*, user_address: *str*, key: *cryptography.hazmat.primitives.asymmetric.rsa.RSAPublicKey*)
+- *Sends a Votifier v1 vote to a Votifier v1 server*
+
+#### *function* aiovotifier.**nuvotifier_vote**(r: *asyncio.StreamReader*, w: *asyncio.StreamWriter*, service_name: *str*, username: *str*, user_address: *str*, token: *str*, challenge: *str*) -> *dict*
+- *Sends a NuVotifier / v2 vote to a NuVotifier server*
 
 #### *exception* aiovotifier.**VotifierError**
-- *base class that all votifier exceptions derive from*
+- *Base class that all votifier exceptions derive from*
 
 #### *exception* aiovotifier.**VotifierHeaderError**
-- *raised when the header from the votifier server is invalid*
+- *Raised when the header from the votifier server is invalid*
 
 #### *exception* aiovotifier.**UnsupportedVersionError**
-- *raised when the votifier version is unsupported*
+- *Raised when the votifier version is unsupported*
 
 #### *exception* aiovotifier.**NuVotifierResponseError**
 - *Raised when the response from the votifier server contains a status that is not OK*
