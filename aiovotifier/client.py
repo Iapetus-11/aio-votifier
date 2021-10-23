@@ -16,29 +16,29 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 from .errors import NuVotifierResponseError, VotifierHeaderError, UnsupportedVersionError
 from .utils import ensure_pem_format
 
-__all__ = (
-    "votifier_v1_vote",
-    "nuvotifier_vote",
-    "VotifierHeader",
-    "VotifierClient"
-)
+__all__ = ("votifier_v1_vote", "nuvotifier_vote", "VotifierHeader", "VotifierClient")
 
 
 async def votifier_v1_vote(r: StreamReader, service_name: str, username: str, user_address: str, key: RSAPublicKey) -> None:
-    data = "\n".join([
-        "VOTE",
-        service_name,
-        username,
-        user_address,
-        str(round(time.time())),
-    ]).encode()
+    data = "\n".join(
+        [
+            "VOTE",
+            service_name,
+            username,
+            user_address,
+            str(round(time.time())),
+        ]
+    ).encode()
 
     encrypted = key.encrypt(data, PKCS1v15())
 
     r.write(encrypted)
     await r.drain()
 
-async def nuvotifier_vote(r: StreamReader, w: StreamWriter, service_name: str, username: str, user_address: str, token: str, header_split: List[str]) -> dict:
+
+async def nuvotifier_vote(
+    r: StreamReader, w: StreamWriter, service_name: str, username: str, user_address: str, token: str, header_split: List[str]
+) -> dict:
     # create packet data
     payload = json.dumps(
         {
@@ -82,7 +82,7 @@ class VotifierHeader:
 
         if 3 < split_length < 2:
             raise VotifierHeaderError(header)
-        
+
         if header_split[0] != "VOTIFIER":
             raise VotifierHeaderError(header)
 
@@ -127,7 +127,7 @@ class VotifierClient:
         """Sends a vote to the votifier server, automatically determining the protocol to use"""
 
         r, w, header = await self._connect()
-        
+
         try:
             if header.version == "1":
                 if self._rsa_pub_key_exc:
@@ -153,7 +153,7 @@ class VotifierClient:
 
             if self._rsa_pub_key_exc:
                 raise self._rsa_pub_key_exc
-            
+
             await votifier_v1_vote(r, self.service_name, username, user_address, self._rsa_pub_key)
         finally:
             w.close()
@@ -165,7 +165,7 @@ class VotifierClient:
         try:
             if header.version != "2":
                 raise UnsupportedVersionError(header.version)
-            
+
             await nuvotifier_vote(r, w, self.service_name, username, user_address, self.secret)
         finally:
             w.close()
