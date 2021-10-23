@@ -98,7 +98,7 @@ class VotifierHeader:
 class VotifierClient:
     __slots__ = ("host", "port", "service_name", "secret", "_rsa_pub_key", "_rsa_pub_key_exc")
 
-    def __init__(self, host: str, port: int, service_name: str, secret: str) -> None:
+    def __init__(self, host: str, port: int, service_name: str, secret: str):
         self.host = host
         self.port = port
         self.service_name = service_name
