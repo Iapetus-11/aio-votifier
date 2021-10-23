@@ -19,7 +19,9 @@ from .utils import ensure_pem_format
 __all__ = ("votifier_v1_vote", "nuvotifier_vote", "VotifierHeader", "VotifierClient")
 
 
-async def votifier_v1_vote(r: StreamReader, w: StreamWriter, service_name: str, username: str, user_address: str, key: RSAPublicKey) -> None:
+async def votifier_v1_vote(
+    r: StreamReader, w: StreamWriter, service_name: str, username: str, user_address: str, key: RSAPublicKey
+) -> None:
     data = "\n".join(
         [
             "VOTE",
