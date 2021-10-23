@@ -13,8 +13,8 @@ async def main():
     await client.vote("username", "user address")
     await client.vote("user2")
 
-    await client.v1_vote("username", "user address")  # only supports v1
-    await client.nu_vote("username", "user address")  # only supports NuVotifier/v2
+    await client.v1_vote("username", "user address")  # only supports v1 protocol
+    await client.nu_vote("username", "user address")  # only supports NuVotifier/v2 protocol
 
 asyncio.run(main())
 ```
