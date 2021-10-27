@@ -56,3 +56,10 @@ asyncio.run(main())
 
 #### *exception* aiovotifier.**NuVotifierResponseError**
 - *Raised when the response from the votifier server contains a status that is not OK*
+
+## Credits
+*aiovotifier was based off the code and documentation below*
+- https://github.com/ano95/votifier2-py
+- https://www.npmjs.com/package/votifier-client/v/0.1.0?activeTab=dependents
+- https://github.com/vexsoftware/votifier
+- https://github.com/NuVotifier/NuVotifier/wiki/Technical-QA
