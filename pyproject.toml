@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "aiovotifier"
-version = "1.0.0"
+version = "1.0.1"
 description = "An asynchronous MInecraft server votifier client in Python"
 authors = ["Milo Weinberg <iapetus011@gmail.com>"]
 license = "MIT"
