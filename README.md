@@ -35,7 +35,7 @@ asyncio.run(main())
 - Arguments:
     - `header: bytes` - *The header received from the votifier server*
     - `version: str` - *The version of the votifier server*
-    - `token: str = None` - *The token, included only if the votifier server is v2/NuVotifier*
+    - `challenge: str = None` - *The challenge, included only if the votifier server is v2/NuVotifier*
 - Methods:
     - `@classmethod parse(header: bytes)` - *Returns a new `VotifierHeader`, parsed from the input bytes*
 

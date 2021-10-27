@@ -69,12 +69,12 @@ async def nuvotifier_vote(
 class VotifierHeader:
     """Used for parsing and storing the votifier header data"""
 
-    __slots__ = ("header", "version", "token")
+    __slots__ = ("header", "version", "challenge")
 
-    def __init__(self, header: bytes, version: str, token: str = None):
+    def __init__(self, header: bytes, version: str, challenge: str = None):
         self.header = header
         self.version = version
-        self.token = token
+        self.challenge = challenge
 
     @classmethod
     def parse(cls, header: bytes) -> "VotifierHeader":
@@ -140,7 +140,7 @@ class VotifierClient:
                     # even tho it's v2, the user passed in an rsa key which is only used in v1
                     await votifier_v1_vote(r, w, self.service_name, username, user_address, self._rsa_pub_key)
                 else:
-                    await nuvotifier_vote(r, w, self.service_name, username, user_address, self.secret, header.token)
+                    await nuvotifier_vote(r, w, self.service_name, username, user_address, self.secret, header.challenge)
             else:
                 raise UnsupportedVersionError(header.version)
         finally:
@@ -171,7 +171,7 @@ class VotifierClient:
             if header.version != "2":
                 raise UnsupportedVersionError(header.version)
 
-            return await nuvotifier_vote(r, w, self.service_name, username, user_address, self.secret, header.token)
+            return await nuvotifier_vote(r, w, self.service_name, username, user_address, self.secret, header.challenge)
         finally:
             w.close()
             await w.wait_closed()
