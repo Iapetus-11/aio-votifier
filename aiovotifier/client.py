@@ -104,8 +104,8 @@ class VotifierClient:
         self.service_name = service_name
         self.secret = secret
 
-        self._rsa_pub_key: Optional[RSAPublicKey]
-        self._rsa_pub_key_exc: Optional[Exception]
+        self._rsa_pub_key: Optional[RSAPublicKey] = None
+        self._rsa_pub_key_exc: Optional[Exception] = None
 
         try:
             self._rsa_pub_key = load_pem_public_key(ensure_pem_format(secret).encode())
