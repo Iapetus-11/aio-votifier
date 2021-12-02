@@ -92,7 +92,7 @@ class VotifierHeader:
         if version == "2" and split_length != 3:
             raise VotifierHeaderError(header)
 
-        return cls(header, version, (header[3] if split_length == 3 else None))
+        return cls(header, version, (header_split[2].rstrip("\n") if split_length == 3 else None))
 
 
 class VotifierClient:
@@ -128,6 +128,8 @@ class VotifierClient:
         """Sends a vote to the votifier server, automatically determining the protocol to use"""
 
         r, w, header = await self._connect()
+
+        print(header.header)
 
         try:
             if header.version == "1":
