@@ -129,8 +129,6 @@ class VotifierClient:
 
         r, w, header = await self._connect()
 
-        print(header.header)
-
         try:
             if header.version == "1":
                 if self._rsa_pub_key_exc:
