@@ -20,3 +20,11 @@ class NuVotifierResponseError(VotifierError):
     def __init__(self, response: dict):
         super().__init__(f"Not-OK response received from votifier server: {repr(response)}")
         self.response = response
+
+
+__all__ = [
+    "VotifierError",
+    "VotifierHeaderError",
+    "UnsupportedVersionError",
+    "NuVotifierResponseError",
+]

@@ -1,5 +1,4 @@
 from asyncio.streams import StreamReader, StreamWriter
-from typing import Tuple, List, Optional
 from base64 import b64encode
 import datetime
 import asyncio
@@ -13,14 +12,20 @@ from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from cryptography.hazmat.primitives.asymmetric.padding import PKCS1v15
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPublicKey
 
-from .errors import NuVotifierResponseError, VotifierHeaderError, UnsupportedVersionError
+from .errors import (
+    NuVotifierResponseError,
+    VotifierHeaderError,
+    UnsupportedVersionError,
+)
 from .utils import ensure_pem_format
-
-__all__ = ("votifier_v1_vote", "nuvotifier_vote", "VotifierHeader", "VotifierClient")
 
 
 async def votifier_v1_vote(
-    r: StreamReader, w: StreamWriter, service_name: str, username: str, user_address: str, key: RSAPublicKey
+    w: StreamWriter,
+    service_name: str,
+    username: str,
+    user_address: str,
+    key: RSAPublicKey,
 ) -> None:
     data = "\n".join(
         [
@@ -39,7 +44,13 @@ async def votifier_v1_vote(
 
 
 async def nuvotifier_vote(
-    r: StreamReader, w: StreamWriter, service_name: str, username: str, user_address: str, token: str, challenge: str
+    r: StreamReader,
+    w: StreamWriter,
+    service_name: str,
+    username: str,
+    user_address: str,
+    token: str,
+    challenge: str,
 ) -> dict:
     # create packet data
     payload = json.dumps(
@@ -71,7 +82,7 @@ class VotifierHeader:
 
     __slots__ = ("header", "version", "challenge")
 
-    def __init__(self, header: bytes, version: str, challenge: str = None):
+    def __init__(self, header: bytes, version: str, challenge: str | None = None):
         self.header = header
         self.version = version
         self.challenge = challenge
@@ -92,11 +103,22 @@ class VotifierHeader:
         if version == "2" and split_length != 3:
             raise VotifierHeaderError(header)
 
-        return cls(header, version, (header_split[2].rstrip("\n") if split_length == 3 else None))
+        return cls(
+            header,
+            version,
+            (header_split[2].rstrip("\n") if split_length == 3 else None),
+        )
 
 
 class VotifierClient:
-    __slots__ = ("host", "port", "service_name", "secret", "_rsa_pub_key", "_rsa_pub_key_exc")
+    __slots__ = (
+        "host",
+        "port",
+        "service_name",
+        "secret",
+        "_rsa_pub_key",
+        "_rsa_pub_key_exc",
+    )
 
     def __init__(self, host: str, port: int, service_name: str, secret: str):
         self.host = host
@@ -104,15 +126,17 @@ class VotifierClient:
         self.service_name = service_name
         self.secret = secret
 
-        self._rsa_pub_key: Optional[RSAPublicKey] = None
-        self._rsa_pub_key_exc: Optional[Exception] = None
+        self._rsa_pub_key: RSAPublicKey | None = None
+        self._rsa_pub_key_exc: Exception | None = None
 
         try:
-            self._rsa_pub_key = load_pem_public_key(ensure_pem_format(secret).encode())
+            rsa_pub_key = load_pem_public_key(ensure_pem_format(secret).encode())
+            assert isinstance(rsa_pub_key, RSAPublicKey)
+            self._rsa_pub_key = rsa_pub_key
         except Exception as e:
             self._rsa_pub_key_exc = e
 
-    async def _connect(self) -> Tuple[StreamReader, StreamWriter, VotifierHeader]:
+    async def _connect(self) -> tuple[StreamReader, StreamWriter, VotifierHeader]:
         r, w = await asyncio.open_connection(self.host, self.port)
 
         try:
@@ -134,13 +158,32 @@ class VotifierClient:
                 if self._rsa_pub_key_exc:
                     raise self._rsa_pub_key_exc
 
-                await votifier_v1_vote(r, w, self.service_name, username, user_address, self._rsa_pub_key)
+                assert self._rsa_pub_key is not None
+
+                await votifier_v1_vote(
+                    w, self.service_name, username, user_address, self._rsa_pub_key
+                )
             elif header.version == "2":
                 if self._rsa_pub_key:
                     # even tho it's v2, the user passed in an rsa key which is only used in v1
-                    await votifier_v1_vote(r, w, self.service_name, username, user_address, self._rsa_pub_key)
+                    await votifier_v1_vote(
+                        w,
+                        self.service_name,
+                        username,
+                        user_address,
+                        self._rsa_pub_key,
+                    )
                 else:
-                    await nuvotifier_vote(r, w, self.service_name, username, user_address, self.secret, header.challenge)
+                    assert header.challenge is not None
+                    await nuvotifier_vote(
+                        r,
+                        w,
+                        self.service_name,
+                        username,
+                        user_address,
+                        self.secret,
+                        header.challenge,
+                    )
             else:
                 raise UnsupportedVersionError(header.version)
         finally:
@@ -150,7 +193,7 @@ class VotifierClient:
     async def v1_vote(self, username: str, user_address: str = "127.0.0.1") -> None:
         """Sends a Votifier v1 vote to the votifier server"""
 
-        r, w, header = await self._connect()
+        _, w, header = await self._connect()
 
         try:
             if header.version != "1":
@@ -159,7 +202,9 @@ class VotifierClient:
             if self._rsa_pub_key_exc:
                 raise self._rsa_pub_key_exc
 
-            await votifier_v1_vote(r, w, self.service_name, username, user_address, self._rsa_pub_key)
+            assert self._rsa_pub_key is not None
+
+            await votifier_v1_vote(w, self.service_name, username, user_address, self._rsa_pub_key)
         finally:
             w.close()
             await w.wait_closed()
@@ -171,7 +216,24 @@ class VotifierClient:
             if header.version != "2":
                 raise UnsupportedVersionError(header.version)
 
-            return await nuvotifier_vote(r, w, self.service_name, username, user_address, self.secret, header.challenge)
+            assert header.challenge is not None
+            return await nuvotifier_vote(
+                r,
+                w,
+                self.service_name,
+                username,
+                user_address,
+                self.secret,
+                header.challenge,
+            )
         finally:
             w.close()
             await w.wait_closed()
+
+
+__all__ = [
+    "votifier_v1_vote",
+    "nuvotifier_vote",
+    "VotifierHeader",
+    "VotifierClient",
+]
